@@ -1,0 +1,32 @@
+# $s0 = array base address, $s1 = i
+# initialization code
+  lui  $s0, 0x0001            # $s0 = 0x00010000
+  ori  $s0, $s0, 0xF000       # $s0 = 0x0001F000
+  addiu $s1, $0, 0            # i = 0 # $s1 = 0
+  addiu $t2, $0, 10           # $t2 = 10
+  addiu $t3, $0, 5              # $t3 = 5
+
+loop:
+  slt  $t0, $s1, $t2          # i < 10?  -> s1 < t2 => t0 = 1
+  beq  $t0, $0, done          # if not then done
+  nop                         # delay slot
+  slt  $t0, $s1, $t3          # i < 5 => t0 =1
+  beq  $t0, $0, else          # i >= 5  => go to else
+  nop
+  sll  $t0, $s1, 2            # t0 = s1 * 2^2
+  addu $t0, $t0, $s0          # t0 = t0 + s0  -> $t0은 주솟값인듯
+  sw   $s1, 0($t0)            # $t0에 $s1에 있는 value 적기
+  addiu $s1, $s1, 1           # $s1에 1 더하기
+  j loop
+  nop
+
+  else:
+  sll  $t0, $s1, 2
+  addu $t0, $t0, $s0
+  subu $t1, $t2, $s1
+  sw $t1, 0($t0)
+  addiu $s1, $s1, 1           # i = i + 1
+  j    loop                   # repeat
+  nop                    # delay slot
+done:
+ 

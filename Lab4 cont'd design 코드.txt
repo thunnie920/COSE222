@@ -1,0 +1,53 @@
+--------Lab4 sv design code--------
+module patterndet (input logic clk,
+                   input logic rst,
+                   input logic in,
+                   output logic out);
+  typedef enum logic [2:0] {S0, S1, S2, S3, S4} statetype;
+  statetype [2:0] state, nextstate;
+  
+  //state register
+  always_ff @ (posedge clk or posedge rst)
+    if (rst) state <= S0;
+    else     state <= nextstate;
+  
+  //next state logic
+  always_comb
+    case (state)
+      S0:      nextstate = (in) ? S1: S0;
+      S1:      nextstate = (in) ? S1: S2;
+      S2:      nextstate = (in) ? S3: S0;
+      S3:      nextstate = (in) ? S4: S2;
+      S4:      nextstate = (in) ? S1: S2;
+      default: nextstate = S0;
+    endcase
+  
+  //output logic
+  assign out = (state == S4) ? 1'b1: 1'b0;
+endmodule
+
+
+--------Lab4 testbench code--------
+
+module testbench();
+  logic clk, rst, in;
+  logic out;
+  // instantiate device under test
+  patterndet dut(clk, rst, in, out);
+
+  always     // no sensitivity list, so it always executes
+    begin
+      clk = 1; #5; clk = 0; #5;
+    end
+
+  initial begin
+    $dumpfile("dump.vcd"); $dumpvars;
+    in = 0; rst = 1; #21; rst = 0; #10
+    in = 1; #30
+    in = 0; #40
+    in = 1; #10
+    in = 0; #10
+    in = 1; #40
+    in = 0;
+  end
+endmodule 

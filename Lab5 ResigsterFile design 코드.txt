@@ -1,0 +1,32 @@
+module regfile (
+  input logic iClk,
+  input logic iReset,
+  input logic [4:0] iRaddr1,
+  input logic [4:0] iRaddr2,
+  input logic [4:0] iWaddr,
+  input logic iWe,
+  input logic [31:0] iWdata,
+  output logic [31:0] oRdata1,
+  output logic [31:0] oRdata2
+);
+
+  logic [31:0] regs[31:0];
+
+  always_ff @(posedge iClk or posedge iReset) begin
+    if (iReset) begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        regs[i] <= 32'h0;
+      end
+    end else if (iWe) begin
+      regs[iWaddr] <= iWdata;
+    end
+  end
+
+  assign oRdata1 = (iRaddr1 == 5'b0) ? 32'b0 : (iRaddr1 < 32) ? regs[iRaddr1] : 32'b0;
+  assign oRdata2 = (iRaddr2 == 5'b0) ? 32'b0 : (iRaddr2 < 32) ? regs[iRaddr2] : 32'b0;
+
+endmodule
+
+
+
+https://www.edaplayground.com/x/uFpj
